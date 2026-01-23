@@ -54,8 +54,10 @@ var app = builder.Build();
 // === CONFIGURAÇÃO DO PIPELINE DE REQUISIÇÃO ===
 
 // Habilita Swagger apenas em ambiente Development
-if (app.Environment.IsDevelopment())
-    app.UseSwagger(); // UseSwagger expõe a especificação OpenAPI em JSON
+// if (app.Environment.IsDevelopment())
+
+// optei por usar o swagger em todos os ambientes para facilitar testes e uso da API pública
+app.UseSwagger(); // UseSwagger expõe a especificação OpenAPI em JSON
 
 // UseSwaggerUI cria a interface visual interativa
 app.UseSwaggerUI(options =>
