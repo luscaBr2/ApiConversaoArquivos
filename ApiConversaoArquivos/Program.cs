@@ -106,5 +106,8 @@ app.MapGet("/health", () => Results.Ok(new
 .WithTags("Sistema")
 .Produces(200);
 
+// Sem swaager
+app.MapGet("/", () => "API Online");
+
 // Inicia a aplicação
 app.Run();
