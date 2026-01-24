@@ -7,6 +7,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // === CONFIGURAÇÃO DE SERVIÇOS ===
 
+// Configurar Kestrel para aceitar uploads grandes
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 104857600; // 100 MB
+});
+
 // AddEndpointsApiExplorer permite que a API exponha metadados dos endpoints
 // Isso é essencial para que o Swagger/OpenAPI consiga descobrir os endpoints
 builder.Services.AddEndpointsApiExplorer();
