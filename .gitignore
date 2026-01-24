@@ -30,3 +30,7 @@ node_modules/
 *.temp
 TestResults/
 *.coverage
+
+# Arquivos compilados
+publish
+logs
