@@ -1,22 +1,12 @@
 ﻿using ApiConversaoArquivos.Services.Implementations;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 
 namespace ApiConversaoArquivos.Endpoints
 {
-    /// <summary>
-    /// Classe estática que define os endpoints da API
-    /// 
-    /// Como usar: Esta classe define um único endpoint unificado que aceita qualquer tipo de arquivo.
-    /// O sistema identifica automaticamente o tipo e faz a conversão apropriada.
-    /// </summary>
     public static class FileConverterEndpoints
     {
-        /// <summary>
-        /// Método de extensão que mapeia todos os endpoints de conversão
-        /// </summary>
         public static void MapFileConverterEndpoints(this WebApplication app)
         {
             var group = app.MapGroup("/api/convert")
@@ -24,11 +14,13 @@ namespace ApiConversaoArquivos.Endpoints
 
             group.MapPost("/", async (
                 IFormFile file,
-                [FromForm] string? connectionString,
                 PdfConverterService pdfService,
                 ExcelConverterService excelService,
                 CsvConverterService csvService,
-                SqlConverterService sqlService)
+                DocxConverterService docxService,
+                XmlConverterService xmlService,
+                TxtConverterService txtService,
+                LogConverterService logService)
                 =>
             {
                 try
@@ -68,24 +60,20 @@ namespace ApiConversaoArquivos.Endpoints
                                 jsonResult = await csvService.ConvertToJsonAsync(stream, file.FileName);
                                 break;
 
-                            case ".sql":
-                                if (string.IsNullOrWhiteSpace(connectionString))
-                                {
-                                    var sqlErrorResponse = new
-                                    {
-                                        success = false,
-                                        message = "Para arquivos .sql, é necessário fornecer a connectionString",
-                                        error = "ConnectionString is required for .sql files",
-                                        data = (object?)null
-                                    };
-                                    return Results.BadRequest(sqlErrorResponse);
-                                }
+                            case ".docx":
+                                jsonResult = await docxService.ConvertToJsonAsync(stream, file.FileName);
+                                break;
 
-                                jsonResult = await sqlService.ExecuteQueryFromFileAsync(
-                                    stream,
-                                    file.FileName,
-                                    connectionString
-                                );
+                            case ".xml":
+                                jsonResult = await xmlService.ConvertToJsonAsync(stream, file.FileName);
+                                break;
+
+                            case ".txt":
+                                jsonResult = await txtService.ConvertToJsonAsync(stream, file.FileName);
+                                break;
+
+                            case ".log":
+                                jsonResult = await logService.ConvertToJsonAsync(stream, file.FileName);
                                 break;
 
                             default:
@@ -94,7 +82,7 @@ namespace ApiConversaoArquivos.Endpoints
                                     success = false,
                                     message = "Formato de arquivo não suportado",
                                     error = $"A extensão '{fileExtension}' não é suportada. " +
-                                           $"Tipos aceitos: PDF (.pdf), Excel (.xlsx, .xls), CSV (.csv), SQL (.sql)",
+                                           $"Tipos aceitos: PDF (.pdf), Excel (.xlsx, .xls, .xlsm), CSV (.csv), Word (.docx), XML (.xml), Text (.txt), Log (.log)",
                                     data = (object?)null
                                 };
                                 return Results.BadRequest(formatErrorResponse);
@@ -133,12 +121,7 @@ namespace ApiConversaoArquivos.Endpoints
                     // === PDF ===
                     if (fileExtension == ".pdf")
                     {
-                        // Log para debug
-                        Console.WriteLine($"[PDF] jsonResult: {jsonResult?.ToString()}");
-
                         var jsonObject = JObject.Parse(jsonResult.ToString());
-
-                        // Para PDF, retornamos o objeto completo com páginas
                         var pagesValue = jsonObject["pages"];
                         var fullTextValue = jsonObject["fullText"];
                         var totalPagesValue = jsonObject["totalPages"];
@@ -167,11 +150,9 @@ namespace ApiConversaoArquivos.Endpoints
                     }
 
                     // === EXCEL ===
-                    if (fileExtension == ".xlsx" || fileExtension == ".xls")
+                    if (fileExtension == ".xlsx" || fileExtension == ".xls" || fileExtension == ".xlsm")
                     {
                         var jsonObject = JObject.Parse(jsonResult.ToString());
-
-                        // Para Excel, retornamos o objeto completo com sheets
                         var sheetsValue = jsonObject["sheets"];
                         var totalSheetsValue = jsonObject["totalSheets"];
 
@@ -197,48 +178,149 @@ namespace ApiConversaoArquivos.Endpoints
                         return Results.Content(excelResponseJson, "application/json");
                     }
 
-                    // === SQL ===
-                    if (fileExtension == ".sql")
+                    // === DOCX ===
+                    if (fileExtension == ".docx")
                     {
                         var jsonObject = JObject.Parse(jsonResult.ToString());
-                        var dataValue = jsonObject["data"];
-                        var totalRecordsValue = jsonObject["totalRecords"];
+                        var paragraphsValue = jsonObject["paragraphs"];
+                        var tablesValue = jsonObject["tables"];
+                        var fullTextValue = jsonObject["fullText"];
+                        var totalParagraphsValue = jsonObject["totalParagraphs"];
+                        var totalTablesValue = jsonObject["totalTables"];
 
-                        var dataObject = dataValue != null
-                            ? JsonConvert.DeserializeObject(dataValue.ToString(), settings)
+                        var paragraphsObject = paragraphsValue != null
+                            ? JsonConvert.DeserializeObject(paragraphsValue.ToString(), settings)
+                            : null;
+                        var tablesObject = tablesValue != null
+                            ? JsonConvert.DeserializeObject(tablesValue.ToString(), settings)
                             : null;
 
-                        var sqlResponse = new
+                        var docxResponse = new
                         {
                             success = true,
-                            message = "Arquivo SQL executado com sucesso",
+                            message = "Arquivo Word convertido com sucesso para JSON",
                             data = new
                             {
                                 fileName = file.FileName,
-                                queryType = "SQL",
-                                totalRecords = totalRecordsValue?.Value<int>() ?? 0,
-                                records = dataObject
+                                fileType = "Word",
+                                totalParagraphs = totalParagraphsValue?.Value<int>() ?? 0,
+                                totalTables = totalTablesValue?.Value<int>() ?? 0,
+                                paragraphs = paragraphsObject,
+                                tables = tablesObject,
+                                fullText = fullTextValue?.ToString() ?? ""
                             },
                             error = (string?)null
                         };
 
-                        var sqlResponseJson = JsonConvert.SerializeObject(sqlResponse, settings);
-                        return Results.Content(sqlResponseJson, "application/json");
+                        var docxResponseJson = JsonConvert.SerializeObject(docxResponse, settings);
+                        return Results.Content(docxResponseJson, "application/json");
                     }
 
-                    // === FALLBACK (não deveria chegar aqui) ===
+                    // === XML ===
+                    if (fileExtension == ".xml")
+                    {
+                        var jsonObject = JObject.Parse(jsonResult.ToString());
+                        var xmlDataValue = jsonObject["xmlData"];
+                        var rootElementValue = jsonObject["rootElement"];
+                        var rawXmlValue = jsonObject["rawXml"];
+
+                        var xmlDataObject = xmlDataValue != null
+                            ? JsonConvert.DeserializeObject(xmlDataValue.ToString(), settings)
+                            : null;
+
+                        var xmlResponse = new
+                        {
+                            success = true,
+                            message = "Arquivo XML convertido com sucesso para JSON",
+                            data = new
+                            {
+                                fileName = file.FileName,
+                                fileType = "XML",
+                                rootElement = rootElementValue?.ToString() ?? "unknown",
+                                xmlData = xmlDataObject,
+                                rawXml = rawXmlValue?.ToString() ?? ""
+                            },
+                            error = (string?)null
+                        };
+
+                        var xmlResponseJson = JsonConvert.SerializeObject(xmlResponse, settings);
+                        return Results.Content(xmlResponseJson, "application/json");
+                    }
+
+                    // === TXT ===
+                    if (fileExtension == ".txt")
+                    {
+                        var jsonObject = JObject.Parse(jsonResult.ToString());
+                        var linesValue = jsonObject["lines"];
+                        var fullTextValue = jsonObject["fullText"];
+                        var totalLinesValue = jsonObject["totalLines"];
+
+                        var linesObject = linesValue != null
+                            ? JsonConvert.DeserializeObject(linesValue.ToString(), settings)
+                            : null;
+
+                        var txtResponse = new
+                        {
+                            success = true,
+                            message = "Arquivo de texto convertido com sucesso para JSON",
+                            data = new
+                            {
+                                fileName = file.FileName,
+                                fileType = "Text",
+                                totalLines = totalLinesValue?.Value<int>() ?? 0,
+                                lines = linesObject,
+                                fullText = fullTextValue?.ToString() ?? ""
+                            },
+                            error = (string?)null
+                        };
+
+                        var txtResponseJson = JsonConvert.SerializeObject(txtResponse, settings);
+                        return Results.Content(txtResponseJson, "application/json");
+                    }
+
+                    // === LOG ===
+                    if (fileExtension == ".log")
+                    {
+                        var jsonObject = JObject.Parse(jsonResult.ToString());
+                        var entriesValue = jsonObject["entries"];
+                        var fullTextValue = jsonObject["fullText"];
+                        var totalLinesValue = jsonObject["totalLines"];
+                        var errorCountValue = jsonObject["errorCount"];
+                        var logLevelStatsValue = jsonObject["logLevelStats"];
+
+                        var entriesObject = entriesValue != null
+                            ? JsonConvert.DeserializeObject(entriesValue.ToString(), settings)
+                            : null;
+                        var logLevelStatsObject = logLevelStatsValue != null
+                            ? JsonConvert.DeserializeObject(logLevelStatsValue.ToString(), settings)
+                            : null;
+
+                        var logResponse = new
+                        {
+                            success = true,
+                            message = "Arquivo de log convertido com sucesso para JSON",
+                            data = new
+                            {
+                                fileName = file.FileName,
+                                fileType = "Log",
+                                totalLines = totalLinesValue?.Value<int>() ?? 0,
+                                errorCount = errorCountValue?.Value<int>() ?? 0,
+                                logLevelStats = logLevelStatsObject,
+                                entries = entriesObject,
+                                fullText = fullTextValue?.ToString() ?? ""
+                            },
+                            error = (string?)null
+                        };
+
+                        var logResponseJson = JsonConvert.SerializeObject(logResponse, settings);
+                        return Results.Content(logResponseJson, "application/json");
+                    }
+
+                    // === FALLBACK ===
                     return Results.Problem(
                         detail: "Tipo de arquivo não processado",
                         statusCode: 500,
                         title: "Erro interno"
-                    );
-                }
-                catch (SqlException ex)
-                {
-                    return Results.Problem(
-                        detail: $"Erro SQL: {ex.Message}",
-                        statusCode: 500,
-                        title: "Erro ao executar query SQL"
                     );
                 }
                 catch (Exception ex)
@@ -256,9 +338,8 @@ namespace ApiConversaoArquivos.Endpoints
             .WithName("ConverterArquivo")
             .WithSummary("Converte qualquer arquivo suportado para JSON")
             .WithDescription(
-                "Endpoint unificado que aceita PDF, Excel, CSV ou SQL e converte para JSON. " +
-                "O tipo é identificado automaticamente pela extensão. " +
-                "Para arquivos .sql, forneça também o campo 'connectionString'."
+                "Endpoint unificado que aceita PDF, Excel, CSV, Word, XML, TXT ou LOG e converte para JSON. " +
+                "O tipo é identificado automaticamente pela extensão."
             )
             .Accepts<IFormFile>("multipart/form-data")
             .Produces(200, contentType: "application/json")

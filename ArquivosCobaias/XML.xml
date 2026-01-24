@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<livros>
+    <livro>
+        <titulo>Dom Casmurro</titulo>
+        <autor>Machado de Assis</autor>
+        <ano>1899</ano>
+        <genero>Romance</genero>
+    </livro>
+    <livro>
+        <titulo>Memórias Póstumas de Brás Cubas</titulo>
+        <autor>Machado de Assis</autor>
+        <ano>1881</ano>
+        <genero>Romance</genero>
+    </livro>
+</livros>

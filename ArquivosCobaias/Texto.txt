@@ -1,0 +1,8 @@
+Este é um arquivo de texto simples.
+
+Aqui temos uma lista de alguns itens:
+- Maçãs
+- Bananas
+- Laranjas
+
+E um parágrafo de texto explicativo sobre esses itens.

@@ -1,0 +1,5 @@
+2026-01-24 10:15:43 - INFO - Iniciando o processo de carregamento de dados.
+2026-01-24 10:16:00 - ERROR - Falha ao carregar o arquivo de configuração: arquivo não encontrado.
+2026-01-24 10:16:05 - WARN - Tentando carregar o arquivo de backup.
+2026-01-24 10:16:30 - INFO - Backup carregado com sucesso. Prosseguindo com o processamento.
+2026-01-24 10:17:00 - INFO - Processamento finalizado com sucesso. 
