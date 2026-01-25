@@ -5,9 +5,17 @@ using Microsoft.OpenApi;
 var builder = WebApplication.CreateBuilder(args);
 
 // === CONFIGURAÇÃO DE SERVIÇOS ===
+
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxRequestBodySize = 104857600; // 100 MB
+
+    // Configurar Kestrel para responder em HTTP e HTTPS
+    options.ListenAnyIP(5000);  // HTTP
+    options.ListenAnyIP(5001, listenOptions =>  // HTTPS
+    {
+        listenOptions.UseHttps();  // O Let's Encrypt configura o HTTPS automaticamente
+    });
 });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -20,8 +28,9 @@ builder.Services.AddSwaggerGen(options =>
         Description = "API para conversão de arquivos PDF, Excel, CSV, Word, XML, TXT e LOG em formato JSON",
         Contact = new OpenApiContact
         {
-            Name = "Suporte",
-            Email = "suporte@example.com"
+            Name = "Lucas Santos",
+            Email = "lucas.ifsp387@gmail.com",
+            Url = new Uri("https://www.linkedin.com/in/lucas-santos387/")
         }
     });
 });
@@ -48,6 +57,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Forçar redirecionamento de HTTP para HTTPS
+app.UseHttpsRedirection();  // Redireciona todas as requisições HTTP para HTTPS
+
 // === CONFIGURAÇÃO DO PIPELINE ===
 app.UseSwagger();
 app.UseSwaggerUI(options =>
@@ -60,7 +72,7 @@ app.UseSwaggerUI(options =>
     options.DocumentTitle = "API de Conversão - Documentação";
 });
 
-app.UseHttpsRedirection();
+// Habilitar CORS
 app.UseCors("AllowAll");
 
 // === MAPEAMENTO DOS ENDPOINTS ===
@@ -72,7 +84,8 @@ app.MapGet("/health", () => Results.Ok(new
     status = "healthy",
     timestamp = DateTime.UtcNow,
     version = "1.2.0",
-    environment = app.Environment.EnvironmentName
+    environment = app.Environment.EnvironmentName,
+    protocol = "HTTPS"
 }))
 .WithName("HealthCheck")
 .WithDescription("Verifica o status de saúde da API")
