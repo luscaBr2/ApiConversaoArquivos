@@ -1,4 +1,4 @@
-e# 📄 API de Conversão de Arquivos para JSON
+# 📄 API de Conversão de Arquivos para JSON
 
 API REST desenvolvida em C# (.NET 10.0) que converte diversos formatos de arquivo para JSON de forma rápida e eficiente.
 
