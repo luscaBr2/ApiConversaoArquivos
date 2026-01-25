@@ -872,17 +872,7 @@ curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
 
 ---
 
-## 🐛 Solução de Problemas
-
-### Erro de CORS
-
-**Problema:** Erro de CORS ao fazer requisições do navegador.  
-**Solução:** Verifique se está usando o método POST e Content-Type correto (multipart/form-data).
-
-### Arquivo muito grande
-
-**Problema:** Erro ao enviar arquivo grande.  
-**Solução:** Verifique se o arquivo não excede 100 MB. Considere comprimir o arquivo antes do envio.
+## 🐛 Problemas comuns e suas soluções
 
 ### Encoding incorreto
 
@@ -960,7 +950,7 @@ A interface Swagger permite:
 
 - [ ] Suporte para PowerPoint (.pptx)
 - [ ] Suporte para imagens com OCR
-- [ ] Suporte para arquivos compactados (.zip, .rar)
+- [ ] Suporte para arquivos múltiplos arquivos
 - [ ] Autenticação JWT
 - [ ] Rate limiting
 - [ ] Cache de conversões
