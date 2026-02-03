@@ -24,7 +24,7 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "API de Conversão de Arquivos",
-        Version = "v1.2",
+        Version = "v1.2.1",
         Description = "API para conversão de arquivos PDF, Excel, CSV, Word, XML, TXT e LOG em formato JSON",
         Contact = new OpenApiContact
         {
@@ -83,7 +83,7 @@ app.MapGet("/health", () => Results.Ok(new
 {
     status = "healthy",
     timestamp = DateTime.UtcNow,
-    version = "1.2.0",
+    version = "1.2.1",
     environment = app.Environment.EnvironmentName,
     protocol = "HTTPS"
 }))
