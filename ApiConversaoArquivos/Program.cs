@@ -1,41 +1,43 @@
 using ApiConversaoArquivos.Endpoints;
+using ApiConversaoArquivos.GraphQL;
 using ApiConversaoArquivos.Services.Implementations;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// === CONFIGURAÇÃO DE SERVIÇOS ===
-
+// === KESTREL ===
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxRequestBodySize = 104857600; // 100 MB
-
-    // Configurar Kestrel para responder em HTTP e HTTPS
-    options.ListenAnyIP(5000);  // HTTP
-    options.ListenAnyIP(5001, listenOptions =>  // HTTPS
-    {
-        listenOptions.UseHttps();  // O Let's Encrypt configura o HTTPS automaticamente
-    });
 });
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.WebHost.UseUrls("http://localhost:5214");
+}
+else
+{
+    builder.WebHost.UseUrls("http://0.0.0.0:5000");
+}
+
+// === SWAGGER ===
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "API de Conversão de Arquivos",
+        Title = "API de ConversÃ£o de Arquivos",
         Version = "v1.2.1",
-        Description = "API para conversão de arquivos PDF, Excel, CSV, Word, XML, TXT e LOG em formato JSON",
+        Description = "API para conversÃ£o de arquivos PDF, Excel, CSV, Word, XML, TXT e LOG em formato JSON",
         Contact = new OpenApiContact
         {
-            Name = "Lucas Santos",
-            Email = "lucas.ifsp387@gmail.com",
-            Url = new Uri("https://www.linkedin.com/in/lucas-santos387/")
+            Name = "Suporte",
+            Email = "suporte@example.com"
         }
     });
 });
 
-// === INJEÇÃO DE DEPENDÊNCIA ===
+// === SERVIÃ‡OS ===
 builder.Services.AddScoped<PdfConverterService>();
 builder.Services.AddScoped<ExcelConverterService>();
 builder.Services.AddScoped<CsvConverterService>();
@@ -43,39 +45,43 @@ builder.Services.AddScoped<DocxConverterService>();
 builder.Services.AddScoped<XmlConverterService>();
 builder.Services.AddScoped<TxtConverterService>();
 builder.Services.AddScoped<LogConverterService>();
+builder.Services.AddScoped<OcrService>();
+builder.Services.AddScoped<BatchConverterService>();
 
-// === CONFIGURAÇÃO DE CORS ===
+// === CORS ===
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
     });
 });
 
+// === GRAPHQL ===
+builder.Services
+    .AddGraphQLServer()
+    .AddQueryType<Query>()
+    .AddMutationType<Mutation>();
+
 var app = builder.Build();
 
-// Forçar redirecionamento de HTTP para HTTPS
-app.UseHttpsRedirection();  // Redireciona todas as requisições HTTP para HTTPS
-
-// === CONFIGURAÇÃO DO PIPELINE ===
-app.UseSwagger();
-app.UseSwaggerUI(options =>
-{
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "API de Conversão v1.2");
-    options.RoutePrefix = string.Empty;
-    options.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
-    options.DisplayRequestDuration();
-    options.EnableFilter();
-    options.DocumentTitle = "API de Conversão - Documentação";
-});
-
-// Habilitar CORS
+// === PIPELINE ===
 app.UseCors("AllowAll");
 
-// === MAPEAMENTO DOS ENDPOINTS ===
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v2.0");
+    c.RoutePrefix = string.Empty;
+    c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
+    c.DisplayRequestDuration();
+    c.EnableFilter();
+});
+
+// GraphQL
+app.MapGraphQL("/graphql");
+
+// REST Endpoint (unificado com batch)
 app.MapFileConverterEndpoints();
 
 // Health check
@@ -88,8 +94,7 @@ app.MapGet("/health", () => Results.Ok(new
     protocol = "HTTPS"
 }))
 .WithName("HealthCheck")
-.WithDescription("Verifica o status de saúde da API")
-.WithTags("Sistema")
-.Produces(200);
+.WithDescription("Verifica o status de saÃºde da API")
+.WithTags("Sistema");
 
 app.Run();
