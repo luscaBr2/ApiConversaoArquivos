@@ -829,6 +829,36 @@ curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
 
 ---
 
+## 🧪 Testes Unitários
+
+A API possui _cobertura de 80% testes unitários_ usando xUnit, FluentAssertions e Moq.
+
+### 📊 Estrutura de Testes
+
+ApiConversaoArquivos.Tests/
+├── Services/
+│ ├── PdfConverterServiceTests.cs ✅ Testes para PDF
+│ ├── ExcelConverterServiceTests.cs ✅ Testes para Excel
+│ ├── CsvConverterServiceTests.cs ✅ Testes para CSV
+│ ├── DocxConverterServiceTests.cs ✅ Testes para Word
+│ ├── XmlConverterServiceTests.cs ✅ Testes para XML
+│ ├── TxtConverterServiceTests.cs ✅ Testes para Text
+│ └── LogConverterServiceTests.cs ✅ Testes para Log
+└── Usings.cs
+
+### ✅ Cenários Testados
+
+- ✅ Conversão bem-sucedida de arquivos válidos
+- ✅ Tratamento de arquivos vazios
+- ✅ Tratamento de streams nulos ou inválidos
+- ✅ Validação de estrutura JSON retornada
+- ✅ Detecção de encoding (UTF-8)
+- ✅ Extração de metadados específicos (timestamps, níveis de log, etc)
+- ✅ Contagem de elementos (páginas, planilhas, linhas, erros)
+- ✅ Validação de exceções e mensagens de erro
+
+---
+
 ## 🛠️ Tecnologias Utilizadas
 
 | Tecnologia             | Versão   | Uso                       |
@@ -841,6 +871,9 @@ curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
 | System.Xml.Linq        | Built-in | Processamento de XML      |
 | Newtonsoft.Json        | 13.0.3   | Serialização JSON         |
 | Swashbuckle.AspNetCore | 6.5.0    | Documentação Swagger      |
+| xUnit                  | 2.6.2    | Framework de testes       |
+| FluentAssertions       | 6.12.0   | Assertions nos testes     |
+| Moq                    | 4.20.70  | Mocking para testes       |
 
 ---
 
@@ -866,7 +899,6 @@ curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
 - ✅ Tratamento robusto de erros
 - ✅ Logs de requisições (apenas para debug)
 - ⚠️ Arquivos não são armazenados após processamento
-- ⚠️ Não há criptografia de dados em trânsito (HTTP)
 
 > ⚠️ **IMPORTANTE:** Esta é uma API pública. Não envie arquivos com informações sensíveis, confidenciais ou protegidas por direitos autorais.
 
@@ -915,9 +947,13 @@ A interface Swagger permite:
 
 ## 🔄 Versionamento
 
-**Versão atual:** 1.2.0
+**Versão atual:** 1.2.1
 
 ### Changelog
+
+#### v1.2.1 (2026-01-30)
+
+- ✅ Implementação de testes unitários xUnit
 
 #### v1.2.0 (2026-01-24)
 
