@@ -1,4 +1,5 @@
 using ApiConversaoArquivos.Endpoints;
+using ApiConversaoArquivos.GraphQL;
 using ApiConversaoArquivos.Services.Implementations;
 using Microsoft.OpenApi;
 
@@ -35,6 +36,11 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.WebHost.UseUrls("http://localhost:5214", "http://127.0.0.1:5214");
+}
+
 // === INJEÇÃO DE DEPENDÊNCIA ===
 builder.Services.AddScoped<PdfConverterService>();
 builder.Services.AddScoped<ExcelConverterService>();
@@ -43,6 +49,8 @@ builder.Services.AddScoped<DocxConverterService>();
 builder.Services.AddScoped<XmlConverterService>();
 builder.Services.AddScoped<TxtConverterService>();
 builder.Services.AddScoped<LogConverterService>();
+
+builder.Services.AddScoped<BatchConverterService>();
 
 // === CONFIGURAÇÃO DE CORS ===
 builder.Services.AddCors(options =>
@@ -55,41 +63,64 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Uso do GraphQL
+builder.Services
+    .AddGraphQLServer()
+    .AddQueryType<Query>()
+    .AddMutationType<Mutation>()
+    .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true);
+
 var app = builder.Build();
 
 // Forçar redirecionamento de HTTP para HTTPS
 app.UseHttpsRedirection();  // Redireciona todas as requisições HTTP para HTTPS
 
-// === CONFIGURAÇÃO DO PIPELINE ===
+// === PIPELINE (ORDEM IMPORTA!) ===
+
+// 1. CORS primeiro
+app.UseCors("AllowAll");
+
+// 2. Routing
+app.UseRouting();
+
+// 3. Swagger
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "API de Conversão v1.2");
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1.3");
     options.RoutePrefix = string.Empty;
     options.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
     options.DisplayRequestDuration();
     options.EnableFilter();
-    options.DocumentTitle = "API de Conversão - Documentação";
 });
 
-// Habilitar CORS
-app.UseCors("AllowAll");
+// 4. Endpoints
+app.UseEndpoints(endpoints =>
+{
+    // GraphQL DEVE vir ANTES dos outros endpoints
+    endpoints.MapGraphQL("/graphql");
+});
 
-// === MAPEAMENTO DOS ENDPOINTS ===
+// 5. Outros endpoints
 app.MapFileConverterEndpoints();
+app.MapBatchConverterEndpoint();
 
 // Health check
 app.MapGet("/health", () => Results.Ok(new
 {
     status = "healthy",
     timestamp = DateTime.UtcNow,
-    version = "1.2.0",
-    environment = app.Environment.EnvironmentName,
-    protocol = "HTTPS"
+    version = "1.3.0",
+    features = new[] { "OCR", "Batch", "GraphQL" },
+    endpoints = new
+    {
+        swagger = "/",
+        graphql = "/graphql",
+        convert = "/api/convert",
+        batch = "/api/convert/batch",
+        health = "/health"
+    }
 }))
-.WithName("HealthCheck")
-.WithDescription("Verifica o status de saúde da API")
-.WithTags("Sistema")
-.Produces(200);
+.WithTags("Sistema");
 
 app.Run();

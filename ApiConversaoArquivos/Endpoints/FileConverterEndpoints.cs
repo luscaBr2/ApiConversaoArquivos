@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using Path = System.IO.Path;
 
 namespace ApiConversaoArquivos.Endpoints
 {
@@ -343,6 +344,79 @@ namespace ApiConversaoArquivos.Endpoints
             )
             .Accepts<IFormFile>("multipart/form-data")
             .Produces(200, contentType: "application/json")
+            .Produces(400)
+            .Produces(500)
+            .DisableAntiforgery();
+        }
+
+        public static void MapBatchConverterEndpoint(this WebApplication app)
+        {
+            var group = app.MapGroup("/api/convert")
+                .WithTags("Conversão de Arquivos");
+
+            group.MapPost("/batch", async (
+                [FromForm] List<IFormFile> files,
+                [FromForm] bool combineResults,
+                BatchConverterService batchService)
+                =>
+            {
+                try
+                {
+                    if (files == null || files.Count == 0)
+                    {
+                        return Results.BadRequest(new
+                        {
+                            success = false,
+                            message = "Nenhum arquivo foi enviado",
+                            error = "Files are required"
+                        });
+                    }
+
+                    if (files.Count > 20)
+                    {
+                        return Results.BadRequest(new
+                        {
+                            success = false,
+                            message = "Máximo de 20 arquivos por lote",
+                            error = "Too many files"
+                        });
+                    }
+
+                    var result = await batchService.ConvertBatchAsync(files, combineResults);
+
+                    var response = new
+                    {
+                        success = result.Success,
+                        message = result.Message,
+                        data = new
+                        {
+                            totalFiles = result.TotalFiles,
+                            successCount = result.SuccessCount,
+                            failureCount = result.FailureCount,
+                            results = result.Results,
+                            combinedData = result.CombinedData
+                        },
+                        error = (string?)null
+                    };
+
+                    return Results.Ok(response);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[ERRO BATCH] {ex.Message}");
+                    return Results.Problem(
+                        detail: ex.Message,
+                        statusCode: 500,
+                        title: "Erro ao processar lote de arquivos"
+                    );
+                }
+            })
+            .WithName("ConverterLote")
+            .WithSummary("Converte múltiplos arquivos de uma vez")
+            .WithDescription("Aceita até 20 arquivos e os processa em paralelo. " +
+                            "Defina combineResults=true para obter um JSON consolidado.")
+            .Accepts<List<IFormFile>>("multipart/form-data")
+            .Produces(200)
             .Produces(400)
             .Produces(500)
             .DisableAntiforgery();
