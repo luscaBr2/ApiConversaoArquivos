@@ -26,9 +26,9 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "API de Conversão de Arquivos",
-        Version = "v2.0",
-        Description = "API unificada para conversão de arquivos com processamento em lote, OCR e GraphQL",
+        Title = "API de ConversÃ£o de Arquivos",
+        Version = "v1.2.1",
+        Description = "API para conversÃ£o de arquivos PDF, Excel, CSV, Word, XML, TXT e LOG em formato JSON",
         Contact = new OpenApiContact
         {
             Name = "Suporte",
@@ -37,7 +37,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// === SERVIÇOS ===
+// === SERVIÃ‡OS ===
 builder.Services.AddScoped<PdfConverterService>();
 builder.Services.AddScoped<ExcelConverterService>();
 builder.Services.AddScoped<CsvConverterService>();
@@ -89,18 +89,12 @@ app.MapGet("/health", () => Results.Ok(new
 {
     status = "healthy",
     timestamp = DateTime.UtcNow,
-    version = "2.0.0",
-    features = new[] { "Batch Processing", "OCR", "GraphQL" },
-    endpoints = new
-    {
-        swagger = "/",
-        graphql = "/graphql",
-        convert = "/api/convert",
-        health = "/health"
-    }
+    version = "1.2.1",
+    environment = app.Environment.EnvironmentName,
+    protocol = "HTTPS"
 }))
 .WithName("HealthCheck")
-.WithDescription("Verifica o status de saúde da API")
+.WithDescription("Verifica o status de saÃºde da API")
 .WithTags("Sistema");
 
 app.Run();
