@@ -24,8 +24,8 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "API de Conversão de Arquivos",
-        Version = "v1.2",
-        Description = "API para conversão de arquivos PDF, Excel, CSV, Word, XML, TXT e LOG em formato JSON",
+        Version = "v1.3.1",
+        Description = "API para conversão de arquivos PDF, Excel, PowerPoint, CSV, Word, XML, TXT e LOG em formato JSON",
         Contact = new OpenApiContact
         {
             Name = "Lucas Santos",
@@ -36,6 +36,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // === INJEÇÃO DE DEPENDÊNCIA ===
+builder.Services.AddScoped<PptxConverterService>();
 builder.Services.AddScoped<PdfConverterService>();
 builder.Services.AddScoped<ExcelConverterService>();
 builder.Services.AddScoped<CsvConverterService>();
@@ -83,7 +84,7 @@ app.MapGet("/health", () => Results.Ok(new
 {
     status = "healthy",
     timestamp = DateTime.UtcNow,
-    version = "1.2.0",
+    version = "1.2.1",
     environment = app.Environment.EnvironmentName,
     protocol = "HTTPS"
 }))

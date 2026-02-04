@@ -76,13 +76,19 @@ namespace ApiConversaoArquivos.Endpoints
                                 jsonResult = await logService.ConvertToJsonAsync(stream, file.FileName);
                                 break;
 
+                            case ".pptx":
+                            case ".ppt": // Nota: .ppt não é suportado pelo OpenXml, apenas .pptx
+                                var pptxService = new PptxConverterService();
+                                jsonResult = await pptxService.ConvertToJsonAsync(stream, file.FileName);
+                                break;
+
                             default:
                                 var formatErrorResponse = new
                                 {
                                     success = false,
                                     message = "Formato de arquivo não suportado",
                                     error = $"A extensão '{fileExtension}' não é suportada. " +
-                                           $"Tipos aceitos: PDF (.pdf), Excel (.xlsx, .xls, .xlsm), CSV (.csv), Word (.docx), XML (.xml), Text (.txt), Log (.log)",
+                                            $"Tipos aceitos: PDF (.pdf), Excel (.xlsx, .xls, .xlsm), CSV (.csv), Word (.docx), PowerPoint (.pptx), XML (.xml), Text (.txt), Log (.log)",
                                     data = (object?)null
                                 };
                                 return Results.BadRequest(formatErrorResponse);
@@ -314,6 +320,37 @@ namespace ApiConversaoArquivos.Endpoints
 
                         var logResponseJson = JsonConvert.SerializeObject(logResponse, settings);
                         return Results.Content(logResponseJson, "application/json");
+                    }
+
+                    // === POWERPOINT ===
+                    if (fileExtension == ".pptx")
+                    {
+                        var jsonObject = JObject.Parse(jsonResult.ToString());
+                        var slidesValue = jsonObject["slides"];
+                        var fullTextValue = jsonObject["fullText"];
+                        var totalSlidesValue = jsonObject["totalSlides"];
+
+                        var slidesObject = slidesValue != null
+                            ? JsonConvert.DeserializeObject(slidesValue.ToString(), settings)
+                            : null;
+
+                        var pptxResponse = new
+                        {
+                            success = true,
+                            message = "Arquivo PowerPoint convertido com sucesso para JSON",
+                            data = new
+                            {
+                                fileName = file.FileName,
+                                fileType = "PowerPoint",
+                                totalSlides = totalSlidesValue?.Value<int>() ?? 0,
+                                slides = slidesObject,
+                                fullText = fullTextValue?.ToString() ?? ""
+                            },
+                            error = (string?)null
+                        };
+
+                        var pptxResponseJson = JsonConvert.SerializeObject(pptxResponse, settings);
+                        return Results.Content(pptxResponseJson, "application/json");
                     }
 
                     // === FALLBACK ===
