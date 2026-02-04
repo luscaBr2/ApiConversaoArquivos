@@ -77,7 +77,6 @@ namespace ApiConversaoArquivos.Endpoints
                                 break;
 
                             case ".pptx":
-                            case ".ppt": // Nota: .ppt não é suportado pelo OpenXml, apenas .pptx
                                 var pptxService = new PptxConverterService();
                                 jsonResult = await pptxService.ConvertToJsonAsync(stream, file.FileName);
                                 break;
