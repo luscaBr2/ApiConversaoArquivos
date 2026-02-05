@@ -58,7 +58,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Forçar redirecionamento de HTTP para HTTPS
 app.UseHttpsRedirection();  // Redireciona todas as requisições HTTP para HTTPS
 
 // === CONFIGURAÇÃO DO PIPELINE ===
@@ -84,7 +83,7 @@ app.MapGet("/health", () => Results.Ok(new
 {
     status = "healthy",
     timestamp = DateTime.UtcNow,
-    version = "1.2.1",
+    version = "1.3.0",
     environment = app.Environment.EnvironmentName,
     protocol = "HTTPS"
 }))
