@@ -374,7 +374,7 @@ namespace ApiConversaoArquivos.Endpoints
             .WithName("ConverterArquivo")
             .WithSummary("Converte qualquer arquivo suportado para JSON")
             .WithDescription(
-                "Endpoint unificado que aceita PDF, Excel, CSV, Word, XML, TXT ou LOG e converte para JSON. " +
+                "Endpoint unificado que aceita PDF, Excel, PowerPoint, CSV, Word, XML, TXT e LOG e converte para JSON. " +
                 "O tipo é identificado automaticamente pela extensão."
             )
             .Accepts<IFormFile>("multipart/form-data")

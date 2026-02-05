@@ -24,7 +24,7 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "API de Conversão de Arquivos",
-        Version = "v1.3.1",
+        Version = "v1.3.0",
         Description = "API para conversão de arquivos PDF, Excel, PowerPoint, CSV, Word, XML, TXT e LOG em formato JSON",
         Contact = new OpenApiContact
         {

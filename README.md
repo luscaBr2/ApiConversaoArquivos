@@ -14,15 +14,16 @@ Experimente minha aplicação: [https://conversao-arquivos-luscabr2.vercel.app](
 
 ## 🚀 Formatos Suportados
 
-| Formato   | Extensões                | Descrição                                       |
-| --------- | ------------------------ | ----------------------------------------------- |
-| **PDF**   | `.pdf`                   | Extração de texto por página e texto completo   |
-| **Excel** | `.xlsx`, `.xls`, `.xlsm` | Planilhas com múltiplas abas e dados tabulares  |
-| **CSV**   | `.csv`                   | Arquivos de valores separados por vírgula       |
-| **Word**  | `.docx`                  | Documentos com parágrafos, tabelas e formatação |
-| **XML**   | `.xml`                   | Arquivos XML convertidos preservando estrutura  |
-| **Text**  | `.txt`                   | Arquivos de texto simples linha por linha       |
-| **Log**   | `.log`                   | Arquivos de log com detecção de níveis e erros  |
+| Formato        | Extensões                | Descrição                                       |
+| -------------- | ------------------------ | ----------------------------------------------- |
+| **PDF**        | `.pdf`                   | Extração de texto por página e texto completo   |
+| **PowerPoint** | `.pptx`                  | Apresentações com slides, títulos e notas       |
+| **Excel**      | `.xlsx`, `.xls`, `.xlsm` | Planilhas com múltiplas abas e dados tabulares  |
+| **CSV**        | `.csv`                   | Arquivos de valores separados por vírgula       |
+| **Word**       | `.docx`                  | Documentos com parágrafos, tabelas e formatação |
+| **XML**        | `.xml`                   | Arquivos XML convertidos preservando estrutura  |
+| **Text**       | `.txt`                   | Arquivos de texto simples linha por linha       |
+| **Log**        | `.log`                   | Arquivos de log com detecção de níveis e erros  |
 
 ---
 
@@ -64,6 +65,19 @@ http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/
 
 **Descrição:** Extrai texto de cada página e retorna o texto completo do documento.
 
+#### 📊 Campos Retornados:
+
+| Campo                | Tipo    | Descrição                         |
+| -------------------- | ------- | --------------------------------- |
+| `fileName`           | string  | Nome do arquivo                   |
+| `fileType`           | string  | "PDF"                             |
+| `totalPages`         | number  | Número total de páginas           |
+| `pages`              | array   | Array com conteúdo de cada página |
+| `pages[].pageNumber` | number  | Número da página                  |
+| `pages[].content`    | string  | Texto extraído da página          |
+| `pages[].hasContent` | boolean | Se a página tem conteúdo          |
+| `fullText`           | string  | Texto completo do documento       |
+
 #### 📄 Exemplo de Arquivo: `relatorio.pdf`
 
 **Conteúdo:**
@@ -77,13 +91,6 @@ Página 2:
 Produtos mais vendidos:
 1. Notebook - 45 unidades
 2. Mouse - 120 unidades
-```
-
-#### 💻 Request (cURL):
-
-```bash
-curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
-  -F "file=@relatorio.pdf"
 ```
 
 #### ✅ Response (JSON):
@@ -114,24 +121,23 @@ curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
 }
 ```
 
-#### 📊 Campos Retornados:
-
-| Campo                | Tipo    | Descrição                         |
-| -------------------- | ------- | --------------------------------- |
-| `fileName`           | string  | Nome do arquivo                   |
-| `fileType`           | string  | "PDF"                             |
-| `totalPages`         | number  | Número total de páginas           |
-| `pages`              | array   | Array com conteúdo de cada página |
-| `pages[].pageNumber` | number  | Número da página                  |
-| `pages[].content`    | string  | Texto extraído da página          |
-| `pages[].hasContent` | boolean | Se a página tem conteúdo          |
-| `fullText`           | string  | Texto completo do documento       |
-
 ---
 
 ### 2. Excel (.xlsx, .xls, .xlsm)
 
 **Descrição:** Extrai dados de todas as planilhas do arquivo Excel.
+
+#### 📊 Campos Retornados:
+
+| Campo                | Tipo   | Descrição                                        |
+| -------------------- | ------ | ------------------------------------------------ |
+| `fileName`           | string | Nome do arquivo                                  |
+| `fileType`           | string | "Excel"                                          |
+| `totalSheets`        | number | Número de planilhas                              |
+| `sheets`             | array  | Array com dados de cada planilha                 |
+| `sheets[].sheetName` | string | Nome da planilha                                 |
+| `sheets[].rowCount`  | number | Número de linhas de dados                        |
+| `sheets[].data`      | array  | Array de objetos (primeira linha como cabeçalho) |
 
 #### 📄 Exemplo de Arquivo: `vendas.xlsx`
 
@@ -148,13 +154,6 @@ curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
 | ------- | ---------- | ----- |
 | Teclado | 30         | 4500  |
 | Monitor | 15         | 7500  |
-
-#### 💻 Request (cURL):
-
-```bash
-curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
-  -F "file=@vendas.xlsx"
-```
 
 #### ✅ Response (JSON):
 
@@ -205,23 +204,20 @@ curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
 }
 ```
 
-#### 📊 Campos Retornados:
-
-| Campo                | Tipo   | Descrição                                        |
-| -------------------- | ------ | ------------------------------------------------ |
-| `fileName`           | string | Nome do arquivo                                  |
-| `fileType`           | string | "Excel"                                          |
-| `totalSheets`        | number | Número de planilhas                              |
-| `sheets`             | array  | Array com dados de cada planilha                 |
-| `sheets[].sheetName` | string | Nome da planilha                                 |
-| `sheets[].rowCount`  | number | Número de linhas de dados                        |
-| `sheets[].data`      | array  | Array de objetos (primeira linha como cabeçalho) |
-
 ---
 
 ### 3. CSV (.csv)
 
 **Descrição:** Converte arquivo CSV em array de objetos JSON.
+
+#### 📊 Campos Retornados:
+
+| Campo    | Tipo   | Descrição                                       |
+| -------- | ------ | ----------------------------------------------- |
+| `data`   | array  | Array de objetos com os dados do CSV            |
+| `data[]` | object | Cada linha como objeto (colunas = propriedades) |
+
+**Observação:** A primeira linha do CSV é usada como cabeçalho (nomes das propriedades).
 
 #### 📄 Exemplo de Arquivo: `clientes.csv`
 
@@ -230,13 +226,6 @@ Nome,Email,Cidade,Idade
 João Silva,joao@email.com,São Paulo,30
 Maria Santos,maria@email.com,Rio de Janeiro,25
 Pedro Oliveira,pedro@email.com,Belo Horizonte,35
-```
-
-#### 💻 Request (cURL):
-
-```bash
-curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
-  -F "file=@clientes.csv"
 ```
 
 #### ✅ Response (JSON):
@@ -269,20 +258,34 @@ curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
 }
 ```
 
-#### 📊 Campos Retornados:
-
-| Campo    | Tipo   | Descrição                                       |
-| -------- | ------ | ----------------------------------------------- |
-| `data`   | array  | Array de objetos com os dados do CSV            |
-| `data[]` | object | Cada linha como objeto (colunas = propriedades) |
-
-**Observação:** A primeira linha do CSV é usada como cabeçalho (nomes das propriedades).
-
 ---
 
 ### 4. Word (.docx)
 
 **Descrição:** Extrai parágrafos, tabelas e formatação de documentos Word.
+
+#### 📊 Campos Retornados:
+
+| Campo                    | Tipo    | Descrição                               |
+| ------------------------ | ------- | --------------------------------------- |
+| `fileName`               | string  | Nome do arquivo                         |
+| `fileType`               | string  | "Word"                                  |
+| `totalParagraphs`        | number  | Número total de parágrafos              |
+| `totalTables`            | number  | Número total de tabelas                 |
+| `paragraphs`             | array   | Array com dados de cada parágrafo       |
+| `paragraphs[].index`     | number  | Índice do parágrafo                     |
+| `paragraphs[].text`      | string  | Texto do parágrafo                      |
+| `paragraphs[].style`     | string  | Estilo aplicado (Normal, Heading1, etc) |
+| `paragraphs[].isHeading` | boolean | Se é um título                          |
+| `paragraphs[].isBold`    | boolean | Se tem negrito                          |
+| `paragraphs[].isItalic`  | boolean | Se tem itálico                          |
+| `tables`                 | array   | Array com dados de cada tabela          |
+| `tables[].index`         | number  | Índice da tabela                        |
+| `tables[].headers`       | array   | Cabeçalhos da tabela (primeira linha)   |
+| `tables[].rowCount`      | number  | Número de linhas de dados               |
+| `tables[].columnCount`   | number  | Número de colunas                       |
+| `tables[].rows`          | array   | Array com dados de cada linha           |
+| `fullText`               | string  | Texto completo do documento             |
 
 #### 📄 Exemplo de Arquivo: `documento.docx`
 
@@ -302,13 +305,6 @@ Tabela:
 |----------|----------|---------|
 | Ana      | Gerente  | 8000    |
 | Carlos   | Analista | 5000    |
-```
-
-#### 💻 Request (cURL):
-
-```bash
-curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
-  -F "file=@documento.docx"
 ```
 
 #### ✅ Response (JSON):
@@ -374,34 +370,23 @@ curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
 }
 ```
 
-#### 📊 Campos Retornados:
-
-| Campo                    | Tipo    | Descrição                               |
-| ------------------------ | ------- | --------------------------------------- |
-| `fileName`               | string  | Nome do arquivo                         |
-| `fileType`               | string  | "Word"                                  |
-| `totalParagraphs`        | number  | Número total de parágrafos              |
-| `totalTables`            | number  | Número total de tabelas                 |
-| `paragraphs`             | array   | Array com dados de cada parágrafo       |
-| `paragraphs[].index`     | number  | Índice do parágrafo                     |
-| `paragraphs[].text`      | string  | Texto do parágrafo                      |
-| `paragraphs[].style`     | string  | Estilo aplicado (Normal, Heading1, etc) |
-| `paragraphs[].isHeading` | boolean | Se é um título                          |
-| `paragraphs[].isBold`    | boolean | Se tem negrito                          |
-| `paragraphs[].isItalic`  | boolean | Se tem itálico                          |
-| `tables`                 | array   | Array com dados de cada tabela          |
-| `tables[].index`         | number  | Índice da tabela                        |
-| `tables[].headers`       | array   | Cabeçalhos da tabela (primeira linha)   |
-| `tables[].rowCount`      | number  | Número de linhas de dados               |
-| `tables[].columnCount`   | number  | Número de colunas                       |
-| `tables[].rows`          | array   | Array com dados de cada linha           |
-| `fullText`               | string  | Texto completo do documento             |
-
 ---
 
 ### 5. XML (.xml)
 
 **Descrição:** Converte XML para JSON preservando a estrutura hierárquica.
+
+#### 📊 Campos Retornados:
+
+| Campo         | Tipo   | Descrição                          |
+| ------------- | ------ | ---------------------------------- |
+| `fileName`    | string | Nome do arquivo                    |
+| `fileType`    | string | "XML"                              |
+| `rootElement` | string | Nome do elemento raiz do XML       |
+| `xmlData`     | object | Estrutura XML convertida para JSON |
+| `rawXml`      | string | Conteúdo XML original como string  |
+
+**Observação:** Atributos XML são convertidos com prefixo `@` e valores de texto com `#text`.
 
 #### 📄 Exemplo de Arquivo: `config.xml`
 
@@ -418,13 +403,6 @@ curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
     <feature enabled="false">logging</feature>
   </features>
 </configuration>
-```
-
-#### 💻 Request (cURL):
-
-```bash
-curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
-  -F "file=@config.xml"
 ```
 
 #### ✅ Response (JSON):
@@ -464,23 +442,25 @@ curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
 }
 ```
 
-#### 📊 Campos Retornados:
-
-| Campo         | Tipo   | Descrição                          |
-| ------------- | ------ | ---------------------------------- |
-| `fileName`    | string | Nome do arquivo                    |
-| `fileType`    | string | "XML"                              |
-| `rootElement` | string | Nome do elemento raiz do XML       |
-| `xmlData`     | object | Estrutura XML convertida para JSON |
-| `rawXml`      | string | Conteúdo XML original como string  |
-
-**Observação:** Atributos XML são convertidos com prefixo `@` e valores de texto com `#text`.
-
 ---
 
 ### 6. Text (.txt)
 
 **Descrição:** Converte arquivo de texto em array de linhas com metadados.
+
+#### 📊 Campos Retornados:
+
+| Campo                | Tipo    | Descrição                      |
+| -------------------- | ------- | ------------------------------ |
+| `fileName`           | string  | Nome do arquivo                |
+| `fileType`           | string  | "Text"                         |
+| `totalLines`         | number  | Número total de linhas         |
+| `lines`              | array   | Array com dados de cada linha  |
+| `lines[].lineNumber` | number  | Número da linha                |
+| `lines[].content`    | string  | Conteúdo da linha              |
+| `lines[].length`     | number  | Tamanho da linha em caracteres |
+| `lines[].isEmpty`    | boolean | Se a linha está vazia          |
+| `fullText`           | string  | Texto completo do arquivo      |
 
 #### 📄 Exemplo de Arquivo: `notas.txt`
 
@@ -492,13 +472,6 @@ Lista de Tarefas
 3. Implementar novas features
 
 Status: Em andamento
-```
-
-#### 💻 Request (cURL):
-
-```bash
-curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
-  -F "file=@notas.txt"
 ```
 
 #### ✅ Response (JSON):
@@ -561,25 +534,32 @@ curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
 }
 ```
 
-#### 📊 Campos Retornados:
-
-| Campo                | Tipo    | Descrição                      |
-| -------------------- | ------- | ------------------------------ |
-| `fileName`           | string  | Nome do arquivo                |
-| `fileType`           | string  | "Text"                         |
-| `totalLines`         | number  | Número total de linhas         |
-| `lines`              | array   | Array com dados de cada linha  |
-| `lines[].lineNumber` | number  | Número da linha                |
-| `lines[].content`    | string  | Conteúdo da linha              |
-| `lines[].length`     | number  | Tamanho da linha em caracteres |
-| `lines[].isEmpty`    | boolean | Se a linha está vazia          |
-| `fullText`           | string  | Texto completo do arquivo      |
-
 ---
 
 ### 7. Log (.log)
 
 **Descrição:** Analisa arquivos de log com detecção automática de timestamps, níveis e erros.
+
+#### 📊 Campos Retornados:
+
+| Campo                  | Tipo    | Descrição                                    |
+| ---------------------- | ------- | -------------------------------------------- |
+| `fileName`             | string  | Nome do arquivo                              |
+| `fileType`             | string  | "Log"                                        |
+| `totalLines`           | number  | Número total de linhas                       |
+| `errorCount`           | number  | Número de linhas com erros                   |
+| `logLevelStats`        | object  | Estatísticas de níveis de log                |
+| `entries`              | array   | Array com dados de cada linha                |
+| `entries[].lineNumber` | number  | Número da linha                              |
+| `entries[].content`    | string  | Conteúdo da linha                            |
+| `entries[].length`     | number  | Tamanho da linha                             |
+| `entries[].timestamp`  | string  | Timestamp extraído (se encontrado)           |
+| `entries[].logLevel`   | string  | Nível de log (INFO, DEBUG, WARN, ERROR, etc) |
+| `entries[].isError`    | boolean | Se a linha contém erro                       |
+| `entries[].isEmpty`    | boolean | Se a linha está vazia                        |
+| `fullText`             | string  | Texto completo do log                        |
+
+**Níveis de Log Detectados:** DEBUG, INFO, WARN, WARNING, ERROR, FATAL, TRACE, CRITICAL
 
 #### 📄 Exemplo de Arquivo: `application.log`
 
@@ -591,13 +571,6 @@ curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
 [2024-01-24T10:40:15] ERROR Failed to process request: Connection timeout
 [2024-01-24T10:40:16] ERROR Stack trace: at DatabaseService.Query()
 [2024-01-24T10:45:00] INFO Request processed successfully
-```
-
-#### 💻 Request (cURL):
-
-```bash
-curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
-  -F "file=@application.log"
 ```
 
 #### ✅ Response (JSON):
@@ -688,26 +661,77 @@ curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
 }
 ```
 
+---
+
+### 8. PowerPoint (.pptx)
+
+**Descrição:** Extrai texto de slides, títulos e notas do apresentador.
+
 #### 📊 Campos Retornados:
 
-| Campo                  | Tipo    | Descrição                                    |
-| ---------------------- | ------- | -------------------------------------------- |
-| `fileName`             | string  | Nome do arquivo                              |
-| `fileType`             | string  | "Log"                                        |
-| `totalLines`           | number  | Número total de linhas                       |
-| `errorCount`           | number  | Número de linhas com erros                   |
-| `logLevelStats`        | object  | Estatísticas de níveis de log                |
-| `entries`              | array   | Array com dados de cada linha                |
-| `entries[].lineNumber` | number  | Número da linha                              |
-| `entries[].content`    | string  | Conteúdo da linha                            |
-| `entries[].length`     | number  | Tamanho da linha                             |
-| `entries[].timestamp`  | string  | Timestamp extraído (se encontrado)           |
-| `entries[].logLevel`   | string  | Nível de log (INFO, DEBUG, WARN, ERROR, etc) |
-| `entries[].isError`    | boolean | Se a linha contém erro                       |
-| `entries[].isEmpty`    | boolean | Se a linha está vazia                        |
-| `fullText`             | string  | Texto completo do log                        |
+| Campo                  | Tipo    | Descrição                        |
+| ---------------------- | ------- | -------------------------------- |
+| `fileName`             | string  | Nome do arquivo                  |
+| `fileType`             | string  | "PowerPoint"                     |
+| `totalSlides`          | number  | Número total de slides           |
+| `slides`               | array   | Array com conteúdo de cada slide |
+| `slides[].slideNumber` | number  | Número do slide                  |
+| `slides[].title`       | string  | Título do slide                  |
+| `slides[].content`     | string  | Conteúdo do slide                |
+| `slides[].notes`       | string  | Notas do apresentador            |
+| `slides[].hasContent`  | boolean | Se o slide tem conteúdo          |
+| `fullText`             | string  | Texto completo da apresentação   |
 
-**Níveis de Log Detectados:** DEBUG, INFO, WARN, WARNING, ERROR, FATAL, TRACE, CRITICAL
+#### 📄 Exemplo de Arquivo: `apresentacao.pptx`
+
+**Conteúdo:**
+
+```
+Slide 1:
+Título: Relatório Anual 2024
+Conteúdo: Resultados e Perspectivas
+Notas: Apresentar gráfico de crescimento
+
+Slide 2:
+Título: Metas Alcançadas
+Conteúdo:
+• Aumento de 25% nas vendas
+• Expansão para 3 novos estados
+• Lançamento de 5 produtos
+Notas: Destacar produtos mais vendidos
+```
+
+#### ✅ Response (JSON):
+
+```json
+{
+    "success": true,
+    "message": "Arquivo PowerPoint convertido com sucesso para JSON",
+    "data": {
+        "fileName": "apresentacao.pptx",
+        "fileType": "PowerPoint",
+        "totalSlides": 2,
+        "slides": [
+            {
+                "slideNumber": 1,
+                "title": "Relatório Anual 2024",
+                "content": "Resultados e Perspectivas",
+                "notes": "Apresentar gráfico de crescimento",
+                "hasContent": true
+            },
+            {
+                "slideNumber": 2,
+                "title": "Metas Alcançadas",
+                "content": "• Aumento de 25% nas vendas\n• Expansão para 3 novos estados\n• Lançamento de 5 produtos",
+                "notes": "Destacar produtos mais vendidos",
+                "hasContent": true
+            }
+        ],
+        "fullText": "=== Slide 1 ===\nRelatório Anual 2024\nResultados e Perspectivas\n\n=== Slide 2 ===\nMetas Alcançadas\n• Aumento de 25% nas vendas\n• Expansão para 3 novos estados\n• Lançamento de 5 produtos\n"
+    },
+    "error": null
+}
+```
 
 ---
 
@@ -731,7 +755,7 @@ curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
     "success": false,
     "message": "Formato de arquivo não suportado",
     "data": null,
-    "error": "A extensão '.zip' não é suportada. Tipos aceitos: PDF (.pdf), Excel (.xlsx, .xls, .xlsm), CSV (.csv), Word (.docx), XML (.xml), Text (.txt), Log (.log)"
+    "error": "A extensão '.zip' não é suportada. Tipos aceitos: PDF (.pdf), PowerPoint (.pptx), Excel (.xlsx, .xls, .xlsm), CSV (.csv), Word (.docx), XML (.xml), Text (.txt), Log (.log)"
 }
 ```
 
@@ -748,103 +772,25 @@ curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
 
 ---
 
-## 💡 Exemplos de Uso em Diferentes Linguagens
-
-### JavaScript (Fetch)
-
-```javascript
-const formData = new FormData();
-formData.append("file", fileInput.files[0]);
-
-const response = await fetch(
-    "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/",
-    {
-        method: "POST",
-        body: formData,
-    },
-);
-
-const result = await response.json();
-console.log(result.data);
-```
-
-### Python (requests)
-
-```python
-import requests
-
-url = 'http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/'
-files = {'file': open('documento.pdf', 'rb')}
-
-response = requests.post(url, files=files)
-data = response.json()
-print(data['data'])
-```
-
-### C# (HttpClient)
-
-```csharp
-using var client = new HttpClient();
-using var form = new MultipartFormDataContent();
-using var fileContent = new ByteArrayContent(File.ReadAllBytes("arquivo.xlsx"));
-
-fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-form.Add(fileContent, "file", "arquivo.xlsx");
-
-var response = await client.PostAsync(
-    "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/",
-    form
-);
-
-var result = await response.Content.ReadAsStringAsync();
-```
-
-### PHP
-
-```php
-$curl = curl_init();
-
-$file = new CURLFile('documento.pdf', 'application/pdf', 'documento.pdf');
-
-curl_setopt_array($curl, [
-    CURLOPT_URL => 'http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/',
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_POST => true,
-    CURLOPT_POSTFIELDS => ['file' => $file]
-]);
-
-$response = curl_exec($curl);
-$data = json_decode($response, true);
-
-curl_close($curl);
-print_r($data['data']);
-```
-
-### cURL
-
-```bash
-curl -X POST "http://apiconversaoarquivos-luscabr2.runasp.net/api/convert/" \
-  -F "file=@/caminho/para/arquivo.csv"
-```
-
----
-
 ## 🧪 Testes Unitários
 
 A API possui _cobertura de 80% testes unitários_ usando xUnit, FluentAssertions e Moq.
 
 ### 📊 Estrutura de Testes
 
+```
 ApiConversaoArquivos.Tests/
 ├── Services/
-│ ├── PdfConverterServiceTests.cs ✅ Testes para PDF
-│ ├── ExcelConverterServiceTests.cs ✅ Testes para Excel
-│ ├── CsvConverterServiceTests.cs ✅ Testes para CSV
-│ ├── DocxConverterServiceTests.cs ✅ Testes para Word
-│ ├── XmlConverterServiceTests.cs ✅ Testes para XML
-│ ├── TxtConverterServiceTests.cs ✅ Testes para Text
-│ └── LogConverterServiceTests.cs ✅ Testes para Log
+│   ├── PdfConverterServiceTests.cs      ✅ Testes para PDF
+│   ├── PptxConverterServiceTests.cs     ✅ Testes para PowerPoint
+│   ├── ExcelConverterServiceTests.cs    ✅ Testes para Excel
+│   ├── CsvConverterServiceTests.cs      ✅ Testes para CSV
+│   ├── DocxConverterServiceTests.cs     ✅ Testes para Word
+│   ├── XmlConverterServiceTests.cs      ✅ Testes para XML
+│   ├── TxtConverterServiceTests.cs      ✅ Testes para Text
+│   └── LogConverterServiceTests.cs      ✅ Testes para Log
 └── Usings.cs
+```
 
 ### ✅ Cenários Testados
 
@@ -854,26 +800,26 @@ ApiConversaoArquivos.Tests/
 - ✅ Validação de estrutura JSON retornada
 - ✅ Detecção de encoding (UTF-8)
 - ✅ Extração de metadados específicos (timestamps, níveis de log, etc)
-- ✅ Contagem de elementos (páginas, planilhas, linhas, erros)
+- ✅ Contagem de elementos (páginas, planilhas, linhas, erros, slides)
 - ✅ Validação de exceções e mensagens de erro
 
 ---
 
 ## 🛠️ Tecnologias Utilizadas
 
-| Tecnologia             | Versão   | Uso                       |
-| ---------------------- | -------- | ------------------------- |
-| .NET                   | 10.0     | Framework principal       |
-| iTextSharp             | 5.5.13.3 | Processamento de PDFs     |
-| ExcelDataReader        | 3.7.0    | Leitura de arquivos Excel |
-| CsvHelper              | 30.0.1   | Processamento de CSV      |
-| DocumentFormat.OpenXml | 3.0.0    | Processamento de Word     |
-| System.Xml.Linq        | Built-in | Processamento de XML      |
-| Newtonsoft.Json        | 13.0.3   | Serialização JSON         |
-| Swashbuckle.AspNetCore | 6.5.0    | Documentação Swagger      |
-| xUnit                  | 2.6.2    | Framework de testes       |
-| FluentAssertions       | 6.12.0   | Assertions nos testes     |
-| Moq                    | 4.20.70  | Mocking para testes       |
+| Tecnologia             | Versão   | Uso                                |
+| ---------------------- | -------- | ---------------------------------- |
+| .NET                   | 8.0      | Framework principal                |
+| iTextSharp             | 5.5.13.3 | Processamento de PDFs              |
+| DocumentFormat.OpenXml | 3.0.0    | Processamento de Word e PowerPoint |
+| ExcelDataReader        | 3.7.0    | Leitura de arquivos Excel          |
+| CsvHelper              | 30.0.1   | Processamento de CSV               |
+| System.Xml.Linq        | Built-in | Processamento de XML               |
+| Newtonsoft.Json        | 13.0.3   | Serialização JSON                  |
+| Swashbuckle.AspNetCore | 6.5.0    | Documentação Swagger               |
+| xUnit                  | 2.6.2    | Framework de testes                |
+| FluentAssertions       | 6.12.0   | Assertions nos testes              |
+| Moq                    | 4.20.70  | Mocking para testes                |
 
 ---
 
@@ -926,6 +872,11 @@ ApiConversaoArquivos.Tests/
 **Problema:** PDF retorna vazio.  
 **Solução:** PDFs baseados em imagens (scaneados) não têm texto extraível. Use OCR antes de converter.
 
+### PowerPoint não extrai texto
+
+**Problema:** Slides retornam vazios.  
+**Solução:** Apenas arquivos `.pptx` são suportados. Converta `.ppt` antigo para `.pptx`.
+
 ---
 
 ## 📖 Documentação Interativa
@@ -939,7 +890,6 @@ http://apiconversaoarquivos-luscabr2.runasp.net/
 A interface Swagger permite:
 
 - ✅ Testar todos os endpoints diretamente no navegador
-- ✅ Ver exemplos de requisições e respostas
 - ✅ Baixar a especificação OpenAPI
 - ✅ Copiar comandos cURL
 
@@ -947,9 +897,13 @@ A interface Swagger permite:
 
 ## 🔄 Versionamento
 
-**Versão atual:** 1.2.1
+**Versão atual:** 1.3.0
 
 ### Changelog
+
+#### v1.3.0 (2026-02-05)
+
+- ✅ Adicionado suporte para PowerPoint (.pptx)
 
 #### v1.2.1 (2026-01-30)
 
@@ -980,18 +934,15 @@ A interface Swagger permite:
 
 ---
 
-## 🎯 Roadmap
-
 ### Próximas Versões
 
-- [ ] Suporte para PowerPoint (.pptx)
 - [ ] Suporte para imagens com OCR
-- [ ] Suporte para arquivos múltiplos arquivos
+- [ ] Suporte para múltiplos arquivos
 - [ ] Autenticação JWT
-- [ ] Rate limiting
 - [ ] Cache de conversões
 - [ ] Processamento assíncrono para arquivos grandes
 - [ ] Webhooks para notificação de conclusão
+- [ ] Conversão reversa (JSON → PDF, Excel, etc)
 
 ---
 
