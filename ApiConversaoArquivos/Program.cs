@@ -65,7 +65,7 @@ app.UseHttpsRedirection();  // Redireciona todas as requisições HTTP para HTTPS
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "API de Conversão v1.2");
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "API de Conversão v1.3");
     options.RoutePrefix = string.Empty;
     options.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
     options.DisplayRequestDuration();
